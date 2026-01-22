@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rose Glass v2.1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { background: #1a1a1a; }
+        .chat-container { height: calc(100vh - 180px); }
+        .message-user { background: linear-gradient(135deg, #d4a574 0%, #c49a6c 100%); }
+        .message-assistant { background: #2a2a2a; border: 1px solid #3a3a3a; }
+        
+        .perception-bar { height: 6px; border-radius: 3px; background: #3a3a3a; overflow: hidden; }
+        .perception-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+        .psi-fill { background: linear-gradient(90deg, #6366f1, #8b5cf6); }
+        .rho-fill { background: linear-gradient(90deg, #10b981, #34d399); }
+        .q-fill { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .f-fill { background: linear-gradient(90deg, #ec4899, #f472b6); }
+        .tau-fill { background: linear-gradient(90deg, #06b6d4, #22d3ee); }
+        .lambda-fill { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+        
+        .state-badge { font-size: 11px; padding: 4px 10px; border-radius: 12px; }
+        .state-grounded { background: #065f46; color: #6ee7b7; }
+        .state-activated { background: #7c2d12; color: #fdba74; }
+        .state-withdrawn { background: #1e3a5f; color: #93c5fd; }
+        .state-crisis { background: #7f1d1d; color: #fca5a5; }
+        .state-flow { background: #4c1d95; color: #c4b5fd; }
+        
+        .input-area { background: #2a2a2a; border: 1px solid #3a3a3a; }
+        .input-area:focus-within { border-color: #d4a574; }
+        textarea:focus { outline: none; }
+        .send-btn { background: linear-gradient(135deg, #d4a574 0%, #c49a6c 100%); }
+        .send-btn:hover { background: linear-gradient(135deg, #c49a6c 0%, #b8906a 100%); }
+        
+        .typing-indicator span { animation: bounce 1.4s infinite ease-in-out both; }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        
+        .fade-in { animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .update-flash { animation: flash 0.5s ease; }
+        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        
+        .lens-select { background: #2a2a2a; border: 1px solid #3a3a3a; color: #e5e5e5; }
+        .lens-select:focus { outline: none; border-color: #d4a574; }
+        
+        .universal-badge { background: #065f46; color: #6ee7b7; font-size: 10px; padding: 2px 6px; border-radius: 8px; }
+    </style>
+</head>
+<body class="text-gray-100">
+    <div class="flex h-screen">
+        <!-- Main Chat Area -->
+        <div class="flex-1 flex flex-col">
+            <!-- Header -->
+            <div class="p-4 border-b border-gray-800 flex items-center gap-3">
+                <div class="text-2xl">🌹</div>
+                <div>
+                    <h1 class="text-lg font-semibold text-gray-100">Rose Glass <span class="text-xs text-gray-500">v2.1</span></h1>
+                    <p class="text-xs text-gray-500">Translation, not measurement. Understanding, not judgment.</p>
+                </div>
+                <div class="ml-auto flex items-center gap-3">
+                    <select id="lens-select" class="lens-select text-xs px-2 py-1 rounded" onchange="changeLens()">
+                        <option value="modern_western">Modern Western</option>
+                        <option value="recovery">Recovery Context</option>
+                        <option value="trauma_informed">Trauma-Informed</option>
+                        <option value="neurodivergent">Neurodivergent</option>
+                        <option value="digital_native">Digital Native</option>
+                        <option value="indigenous_oral">Indigenous Oral</option>
+                        <option value="buddhist_contemplative">Buddhist Contemplative</option>
+                        <option value="medieval_islamic">Medieval Islamic</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Chat Messages -->
+            <div id="chat-container" class="chat-container overflow-y-auto p-4 space-y-4">
+                <div class="text-center text-gray-600 text-sm py-8">
+                    Start a conversation. Rose Glass is perceiving.
+                </div>
+            </div>
+            
+            <!-- Input Area -->
+            <div class="p-4 border-t border-gray-800">
+                <div class="input-area rounded-xl p-3 flex gap-3">
+                    <textarea 
+                        id="message-input"
+                        class="flex-1 bg-transparent resize-none text-gray-100 placeholder-gray-500"
+                        placeholder="Type a message..."
+                        rows="2"
+                        onkeydown="handleKeyDown(event)"
+                    ></textarea>
+                    <button onclick="sendMessage()" class="send-btn px-4 py-2 rounded-lg text-gray-900 font-medium self-end">
+                        Send
+                    </button>
+                </div>
+                <div class="text-xs text-gray-600 mt-2 text-center">
+                    Model: <select id="model-select" class="bg-transparent border-none text-gray-400">
+                        <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
+                        <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
+                        <option value="gpt-4o">GPT-4o</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Perception Panel -->
+        <div id="perception-panel" class="w-80 border-l border-gray-800 p-4 overflow-y-auto">
+            <h2 class="text-sm font-semibold text-gray-400 mb-4">PERCEPTION</h2>
+            <div id="perception-content" class="space-y-6">
+                <div class="text-gray-600 text-sm">Send a message to see Rose Glass perception.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8420';
+        let conversationHistory = [];
+        let currentLens = 'modern_western';
+        
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+        
+        function changeLens() {
+            currentLens = document.getElementById('lens-select').value;
+            console.log('Lens changed to:', currentLens);
+        }
+        
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            input.value = '';
+            addMessageToUI('user', message);
+            conversationHistory.push({ role: 'user', content: message });
+            showTypingIndicator();
+            
+            try {
+                const model = document.getElementById('model-select').value;
+                
+                const response = await fetch(`${API_URL}/v1/chat/completions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: conversationHistory,
+                        temperature: 0.7,
+                        max_tokens: 2048,
+                        lens: currentLens  // Pass current lens
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('Response:', data);
+                
+                hideTypingIndicator();
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${data.detail || 'Unknown error'}`);
+                }
+                
+                const assistantMessage = data.choices?.[0]?.message?.content || 'No response';
+                addMessageToUI('assistant', assistantMessage);
+                conversationHistory.push({ role: 'assistant', content: assistantMessage });
+                
+                if (data.rose_glass) {
+                    updatePerceptionPanel(data.rose_glass);
+                }
+                
+            } catch (error) {
+                hideTypingIndicator();
+                console.error('Error:', error);
+                addMessageToUI('error', `Error: ${error.message}`);
+            }
+        }
+        
+        function addMessageToUI(role, content) {
+            const container = document.getElementById('chat-container');
+            const placeholder = container.querySelector('.text-center');
+            if (placeholder) placeholder.remove();
+            
+            const div = document.createElement('div');
+            div.className = `fade-in flex ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = `max-w-2xl px-4 py-3 rounded-2xl ${
+                role === 'user' ? 'message-user text-gray-900' : 
+                role === 'error' ? 'bg-red-900/50 text-red-200' :
+                'message-assistant text-gray-100'
+            }`;
+            
+            bubble.innerHTML = content
+                .replace(/\n\n/g, '</p><p class="mt-3">')
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`(.*?)`/g, '<code class="bg-black/30 px-1 rounded">$1</code>');
+            
+            div.appendChild(bubble);
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function showTypingIndicator() {
+            const container = document.getElementById('chat-container');
+            const div = document.createElement('div');
+            div.id = 'typing-indicator';
+            div.className = 'fade-in flex justify-start';
+            div.innerHTML = `
+                <div class="message-assistant px-4 py-3 rounded-2xl">
+                    <div class="typing-indicator flex gap-1">
+                        <span class="w-2 h-2 bg-gray-500 rounded-full"></span>
+                        <span class="w-2 h-2 bg-gray-500 rounded-full"></span>
+                        <span class="w-2 h-2 bg-gray-500 rounded-full"></span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function hideTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) indicator.remove();
+        }
+        
+        function updatePerceptionPanel(p) {
+            console.log('Updating perception:', p);
+            const panel = document.getElementById('perception-content');
+            
+            // Normalize values
+            const perception = {
+                psi: p.psi ?? 0.5,
+                rho: p.rho ?? 0.5,
+                q: p.q ?? 0.5,
+                q_optimized: p.q_optimized ?? p.q ?? 0.5,
+                f: p.f ?? 0.5,
+                tau: p.tau ?? 0.5,
+                lambda: p.lambda ?? 0,
+                coherence: p.coherence ?? 0,
+                state: p.state ?? 'grounded',
+                lens: p.lens ?? 'modern_western',
+                markers: p.markers ?? {},
+                is_universal: p.is_universal ?? false
+            };
+            
+            const stateClass = `state-${perception.state}`;
+            
+            panel.innerHTML = `
+                <div class="space-y-4 update-flash">
+                    <!-- State & Lens -->
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-500 text-xs">STATE</span>
+                        <span class="state-badge ${stateClass}">${perception.state.toUpperCase()}</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-500 text-xs">LENS</span>
+                        <span class="text-xs text-gray-400">${perception.lens.replace('_', ' ')}</span>
+                    </div>
+                    
+                    <!-- Coherence Score -->
+                    <div class="bg-gray-800/50 rounded-lg p-3">
+                        <div class="text-3xl font-semibold text-center">${perception.coherence.toFixed(2)}</div>
+                        <div class="text-xs text-gray-500 text-center">COHERENCE</div>
+                        ${perception.is_universal ? '<div class="text-center mt-1"><span class="universal-badge">✨ Universal Pattern</span></div>' : ''}
+                    </div>
+                    
+                    <!-- Core Dimensions -->
+                    <div class="text-xs text-gray-500 mb-2">CORE DIMENSIONS</div>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-gray-400">Ψ Consistency</span>
+                                <span class="text-indigo-400">${(perception.psi * 100).toFixed(0)}%</span>
+                            </div>
+                            <div class="perception-bar">
+                                <div class="perception-fill psi-fill" style="width: ${perception.psi * 100}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-gray-400">ρ Wisdom</span>
+                                <span class="text-emerald-400">${(perception.rho * 100).toFixed(0)}%</span>
+                            </div>
+                            <div class="perception-bar">
+                                <div class="perception-fill rho-fill" style="width: ${perception.rho * 100}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-gray-400">q Activation</span>
+                                <span class="text-amber-400">${(perception.q * 100).toFixed(0)}% → ${(perception.q_optimized * 100).toFixed(0)}%</span>
+                            </div>
+                            <div class="perception-bar">
+                                <div class="perception-fill q-fill" style="width: ${perception.q_optimized * 100}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-gray-400">f Belonging</span>
+                                <span class="text-pink-400">${(perception.f * 100).toFixed(0)}%</span>
+                            </div>
+                            <div class="perception-bar">
+                                <div class="perception-fill f-fill" style="width: ${perception.f * 100}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Extended Dimensions -->
+                    <div class="mt-4 pt-4 border-t border-gray-800">
+                        <div class="text-xs text-gray-500 mb-2">EXTENDED DIMENSIONS</div>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-gray-400">τ Temporal Depth</span>
+                                    <span class="text-cyan-400">${(perception.tau * 100).toFixed(0)}%</span>
+                                </div>
+                                <div class="perception-bar">
+                                    <div class="perception-fill tau-fill" style="width: ${perception.tau * 100}%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-gray-400">λ Lens Interference</span>
+                                    <span class="text-violet-400">${(perception.lambda * 100).toFixed(0)}%</span>
+                                </div>
+                                <div class="perception-bar">
+                                    <div class="perception-fill lambda-fill" style="width: ${Math.min(perception.lambda * 200, 100)}%"></div>
+                                </div>
+                                <div class="text-xs text-gray-600 mt-1">
+                                    ${perception.lambda < 0.1 ? '✨ Low variance = universal pattern' : 'Cultural lens affects interpretation'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Markers -->
+                    <div class="mt-4 pt-4 border-t border-gray-800">
+                        <div class="text-xs text-gray-500 mb-2">MARKERS</div>
+                        ${perception.markers.isolation?.length ? `<div class="text-xs text-blue-400 mb-1">⚠️ Isolation: ${perception.markers.isolation.slice(0,3).join(', ')}</div>` : ''}
+                        ${perception.markers.activation?.length ? `<div class="text-xs text-amber-400 mb-1">⚡ Activation detected</div>` : ''}
+                        ${perception.markers.crisis?.length ? `<div class="text-xs text-red-400 mb-1">🚨 Crisis signals</div>` : ''}
+                        ${perception.markers.belonging?.length ? `<div class="text-xs text-pink-400 mb-1">💜 Belonging language</div>` : ''}
+                        ${perception.markers.wisdom?.length ? `<div class="text-xs text-emerald-400 mb-1">📚 Wisdom markers</div>` : ''}
+                        ${!perception.markers.isolation?.length && !perception.markers.activation?.length && !perception.markers.crisis?.length && !perception.markers.belonging?.length && !perception.markers.wisdom?.length ? '<div class="text-xs text-gray-600">None detected</div>' : ''}
+                    </div>
+                    
+                    <div class="text-xs text-gray-600 mt-4">
+                        Updated: ${new Date().toLocaleTimeString()}
+                    </div>
+                </div>
+            `;
+        }
+        
+        document.getElementById('message-input').focus();
+    </script>
+</body>
+</html>

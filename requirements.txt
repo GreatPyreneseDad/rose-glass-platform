@@ -1,0 +1,21 @@
+# Rose Glass Platform - Dependencies
+
+# Web framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# HTTP client for LLM calls
+httpx>=0.25.0
+
+# Data validation
+pydantic>=2.5.0
+
+# Environment management
+python-dotenv>=1.0.0
+
+# Database (SQLite is built-in, but we need these for later)
+# psycopg2-binary>=2.9.0  # Uncomment for Postgres
+
+# Development
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
