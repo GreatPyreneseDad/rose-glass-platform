@@ -13,8 +13,8 @@ pydantic>=2.5.0
 # Environment management
 python-dotenv>=1.0.0
 
-# Database (SQLite is built-in, but we need these for later)
-# psycopg2-binary>=2.9.0  # Uncomment for Postgres
+# Database
+psycopg2-binary>=2.9.0  # PostgreSQL for Vercel deployment
 
 # Development
 pytest>=7.4.0

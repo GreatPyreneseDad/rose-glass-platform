@@ -22,7 +22,7 @@ import httpx
 
 from src.rose_lens import get_lens, Perception, RoseLens, CULTURAL_LENSES
 from src.calibrator import get_calibrator
-from src.db import get_db, init_db
+from src.db_adapter import get_db, init_db
 
 
 # ============== Models ==============

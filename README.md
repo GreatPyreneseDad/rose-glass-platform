@@ -46,6 +46,26 @@ open ui/index.html
 
 Server runs at `http://localhost:8420`
 
+## Vercel Deployment
+
+Deploy Rose Glass Platform to Vercel with PostgreSQL for production use:
+
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Deploy
+vercel --prod
+```
+
+The platform automatically switches from SQLite (local) to PostgreSQL (production) based on the `DATABASE_URL` environment variable.
+
+**📘 Full deployment guide**: See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete instructions on:
+- Setting up Vercel Postgres
+- Configuring environment variables
+- Custom domain setup
+- Troubleshooting and monitoring
+
 ## API Usage
 
 ### Chat Completions (OpenAI-compatible)
@@ -205,6 +225,7 @@ The framework emerged from lived experience with addiction, trauma, custody batt
 - [ ] Additional cultural lenses (develop with communities)
 - [ ] A/B testing framework for calibration validation
 - [ ] Docker deployment
+- [x] Vercel serverless deployment with PostgreSQL
 - [ ] Hosted API offering
 
 ## License
