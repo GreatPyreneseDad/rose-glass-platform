@@ -1,11 +1,12 @@
 """
-Absolute minimal test - no FastAPI, just pure function
+Absolute minimal test - Vercel BaseHTTPRequestHandler pattern
 """
+from http.server import BaseHTTPRequestHandler
 
-def handler(event, context):
-    """Minimal lambda handler - no dependencies"""
-    return {
-        'statusCode': 200,
-        'headers': {'Content-Type': 'application/json'},
-        'body': '{"status":"ok","message":"Pure lambda working"}'
-    }
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/json')
+        self.end_headers()
+        self.wfile.write(b'{"status":"ok","message":"Pure handler working"}')
+        return

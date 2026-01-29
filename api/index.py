@@ -1,5 +1,6 @@
 """
 Vercel Serverless Function Entry Point for Rose Glass Platform
+Vercel's @vercel/python builder supports ASGI apps natively via 'app' variable
 """
 import sys
 import os
@@ -10,22 +11,22 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
 # Import the serverless-compatible FastAPI app
+# Vercel expects an 'app' variable for ASGI applications
 try:
     from src.server_serverless import app
-    from mangum import Mangum
-
-    # Wrap FastAPI app with Mangum for serverless execution
-    handler = Mangum(app, lifespan="off")
-
 except Exception as e:
     # Fallback minimal app if import fails
     from fastapi import FastAPI
-    from mangum import Mangum
 
     app = FastAPI()
 
     @app.get("/")
+    @app.get("/api")
+    @app.get("/api/")
     def root():
-        return {"error": "Import failed", "details": str(e), "traceback": str(e.__traceback__)}
-
-    handler = Mangum(app, lifespan="off")
+        import traceback
+        return {
+            "error": "Import failed",
+            "details": str(e),
+            "traceback": traceback.format_exc()
+        }
