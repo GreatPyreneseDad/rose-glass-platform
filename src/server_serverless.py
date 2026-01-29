@@ -219,23 +219,29 @@ async def call_openai(
 # ============== Endpoints ==============
 
 @app.get("/")
-async def root():
+@app.get("/api")
+@app.get("/api/")
+async def root(request: Request):
     return {
         "name": "Rose Glass Platform",
         "version": "2.1.0-serverless",
         "status": "operational",
         "available_lenses": list(CULTURAL_LENSES.keys()),
         "message": "Translation, not measurement. Understanding, not judgment.",
-        "note": "Serverless mode - database disabled"
+        "note": "Serverless mode - database disabled",
+        "debug_path": str(request.url.path),
+        "debug_full_url": str(request.url)
     }
 
 
 @app.get("/health")
+@app.get("/api/health")
 async def health():
     return {"status": "healthy", "timestamp": datetime.utcnow().isoformat(), "mode": "serverless"}
 
 
 @app.get("/v1/lenses")
+@app.get("/api/v1/lenses")
 async def list_lenses():
     """List available cultural lenses with descriptions."""
     return {
@@ -256,6 +262,7 @@ async def list_lenses():
 
 
 @app.post("/v1/chat/completions", response_model=ChatResponse)
+@app.post("/api/v1/chat/completions", response_model=ChatResponse)
 async def chat_completions(
     request: ChatRequest,
     authorization: Optional[str] = Header(None),
@@ -352,6 +359,7 @@ async def chat_completions(
 
 
 @app.post("/v1/perceive")
+@app.post("/api/v1/perceive")
 async def perceive_only(request: Request):
     """
     Perception-only endpoint.
@@ -399,6 +407,7 @@ async def perceive_only(request: Request):
 
 
 @app.post("/v1/compare")
+@app.post("/api/v1/compare")
 async def compare_lenses_endpoint(request: Request):
     """
     Compare how text appears through all cultural lenses.
