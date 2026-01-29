@@ -5,10 +5,21 @@ import sys
 import os
 
 # Add parent directory to path so we can import from src
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
 
-# Import app from server
-from src.server import app
+# Import the FastAPI app
+try:
+    from src.server import app
+except Exception as e:
+    # Fallback minimal app if import fails
+    from fastapi import FastAPI
+    app = FastAPI()
 
-# Export for Vercel (must be named 'app')
-__all__ = ['app']
+    @app.get("/")
+    def root():
+        return {"error": "Import failed", "details": str(e)}
+
+# Vercel handler
+handler = app
