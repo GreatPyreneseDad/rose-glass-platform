@@ -118,7 +118,10 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:8420';
+        // Use relative path for API - works both locally and on Vercel
+        const API_URL = window.location.origin.includes('localhost')
+            ? 'http://localhost:8420'
+            : window.location.origin;
         let conversationHistory = [];
         let currentLens = 'modern_western';
         
