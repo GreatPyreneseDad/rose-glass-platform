@@ -12,14 +12,20 @@ sys.path.insert(0, parent_dir)
 # Import the FastAPI app
 try:
     from src.server import app
+    from mangum import Mangum
+
+    # Wrap FastAPI app with Mangum for serverless execution
+    handler = Mangum(app, lifespan="off")
+
 except Exception as e:
     # Fallback minimal app if import fails
     from fastapi import FastAPI
+    from mangum import Mangum
+
     app = FastAPI()
 
     @app.get("/")
     def root():
         return {"error": "Import failed", "details": str(e)}
 
-# Vercel handler
-handler = app
+    handler = Mangum(app, lifespan="off")

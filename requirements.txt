@@ -16,6 +16,9 @@ python-dotenv>=1.0.0
 # Database
 psycopg2-binary>=2.9.0  # PostgreSQL for Vercel deployment
 
+# Serverless adapter
+mangum>=0.17.0  # ASGI adapter for Vercel/AWS Lambda
+
 # Development
 pytest>=7.4.0
 pytest-asyncio>=0.21.0
