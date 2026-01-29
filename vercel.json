@@ -10,11 +10,19 @@
       "use": "@vercel/python"
     },
     {
+      "src": "api/hello.py",
+      "use": "@vercel/python"
+    },
+    {
       "src": "ui/**",
       "use": "@vercel/static"
     }
   ],
   "routes": [
+    {
+      "src": "/hello",
+      "dest": "api/hello.py"
+    },
     {
       "src": "/test/(.*)",
       "dest": "api/test.py"
