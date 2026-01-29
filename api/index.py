@@ -9,9 +9,9 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
-# Import the FastAPI app
+# Import the serverless-compatible FastAPI app
 try:
-    from src.server import app
+    from src.server_serverless import app
     from mangum import Mangum
 
     # Wrap FastAPI app with Mangum for serverless execution
@@ -26,6 +26,6 @@ except Exception as e:
 
     @app.get("/")
     def root():
-        return {"error": "Import failed", "details": str(e)}
+        return {"error": "Import failed", "details": str(e), "traceback": str(e.__traceback__)}
 
     handler = Mangum(app, lifespan="off")
