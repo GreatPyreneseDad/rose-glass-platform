@@ -19,10 +19,5 @@
       "src": "/(.*)",
       "dest": "ui/$1"
     }
-  ],
-  "env": {
-    "ANTHROPIC_API_KEY": "@anthropic_api_key",
-    "OPENAI_API_KEY": "@openai_api_key",
-    "DATABASE_URL": "@database_url"
-  }
+  ]
 }
