@@ -1,0 +1,4 @@
+# Scraper runtime artifacts
+.policy_cache/
+*.md
+!README.md

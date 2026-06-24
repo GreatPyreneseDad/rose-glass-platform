@@ -1,0 +1,10 @@
+# Dependencies for leelanau_policies_scraper.py
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+
+# PDF text extraction (PyMuPDF is primary, pdfminer is the fallback)
+PyMuPDF>=1.23.0
+pdfminer.six>=20221105
+
+# DOCX text extraction (only needed if the page links .docx files)
+python-docx>=1.1.0
